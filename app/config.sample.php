@@ -12,6 +12,7 @@ return [
         'pass' => 'database-password',
     ],
 
+    // Leave client_id empty (or 'xxxx...') to run in manual mode without the Google API.
     'google' => [
         'client_id'     => 'xxxx.apps.googleusercontent.com',
         'client_secret' => 'xxxx',

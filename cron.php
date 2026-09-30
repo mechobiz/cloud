@@ -23,7 +23,7 @@ foreach (q("SELECT * FROM posts WHERE status = 'scheduled' AND scheduled_at <= N
 $last = @filemtime(sys_get_temp_dir() . '/gmbcrm_sync');
 if (!$last || time() - $last > 3600) {
     touch(sys_get_temp_dir() . '/gmbcrm_sync');
-    foreach (q('SELECT * FROM locations')->fetchAll() as $loc) {
+    if (google_enabled()) foreach (q("SELECT * FROM locations WHERE account_name <> 'manual'")->fetchAll() as $loc) {
         try {
             echo "reviews {$loc['title']}: " . gbp_sync_reviews($loc) . "\n";
             echo "insights {$loc['title']}: " . gbp_sync_insights($loc, 7) . "\n";

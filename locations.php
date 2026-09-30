@@ -6,7 +6,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $action = $_POST['action'] ?? '';
     try {
-        if ($action === 'sync') {
+        if ($action === 'add') {
+            $title = trim($_POST['title'] ?? '');
+            if ($title === '') {
+                throw new RuntimeException('Enter a business name.');
+            }
+            q('INSERT INTO locations (account_name, location_name, title, address, phone, website, client_name) VALUES (?,?,?,?,?,?,?)', [
+                'manual', 'manual/' . bin2hex(random_bytes(6)), $title, trim($_POST['address'] ?? '') ?: null,
+                trim($_POST['phone'] ?? '') ?: null, trim($_POST['website'] ?? '') ?: null, trim($_POST['client_name'] ?? '') ?: null,
+            ]);
+            flash('Location added.');
+        } elseif ($action === 'sync') {
             flash('Synced ' . gbp_sync_locations() . ' location(s).');
         } elseif ($action === 'save') {
             $status = in_array($_POST['crm_status'] ?? '', ['lead', 'active', 'paused', 'churned'], true) ? $_POST['crm_status'] : 'active';
@@ -31,12 +41,25 @@ page_header('Locations', 'locations');
 ?>
 <h1>Locations &amp; clients</h1>
 <div class="bar">
+  <?php if (google_enabled()): ?>
   <a class="btn" href="google_connect.php"><?= $g ? 'Reconnect Google' : 'Connect Google' ?></a>
-  <?php if ($g): ?>
+  <?php else: ?>
+  <span class="muted">Manual mode: Google API not configured yet. Add credentials in app/config.php to enable sync.</span>
+  <?php endif; ?>
+  <?php if (google_enabled() && $g): ?>
   <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="action" value="sync"><button>Sync locations</button></form>
   <span class="muted">Connected<?= $g['connected_email'] ? ' as ' . e($g['connected_email']) : '' ?></span>
   <?php endif; ?>
 </div>
+
+<details class="card"><summary><strong>+ Add location manually</strong></summary>
+<form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="add">
+  <label>Business name<input name="title" required></label>
+  <label>Client name<input name="client_name"></label>
+  <label>Address<input name="address"></label>
+  <label>Phone<input name="phone"></label>
+  <label>Website<input name="website"></label>
+  <button>Add</button></form></details>
 
 <?php if ($edit): ?>
 <form method="post" class="card">
@@ -65,7 +88,7 @@ page_header('Locations', 'locations');
   <td><a href="locations.php?edit=<?= (int)$r['id'] ?>">Edit</a></td>
 </tr>
 <?php endforeach; if (!$rows): ?>
-<tr><td colspan="6" class="muted">No locations yet. Connect Google, then click "Sync locations".</td></tr>
+<tr><td colspan="6" class="muted">No locations yet. Add one manually above.</td></tr>
 <?php endif; ?>
 </table>
 <?php page_footer();

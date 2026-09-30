@@ -16,7 +16,7 @@ $recent = q('SELECT r.*, l.title FROM reviews r JOIN locations l ON l.id = r.loc
 page_header('Dashboard', 'dashboard');
 ?>
 <h1>Dashboard</h1>
-<?php if (!google_connected()): ?>
+<?php if (google_enabled() && !google_connected()): ?>
 <div class="flash err">Google is not connected yet. <a href="locations.php">Go to Locations</a> and click Connect Google.</div>
 <?php endif; ?>
 <div class="grid">

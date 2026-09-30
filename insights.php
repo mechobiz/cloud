@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     try {
         $n = 0;
-        foreach (q('SELECT * FROM locations')->fetchAll() as $loc) {
+        foreach (q("SELECT * FROM locations WHERE account_name <> 'manual'")->fetchAll() as $loc) {
             $n += gbp_sync_insights($loc, 30);
         }
         flash("Synced $n data point(s).");
@@ -42,7 +42,9 @@ page_header('Insights', 'insights');
     <option value="0">All locations</option>
     <?php foreach ($locs as $l): ?><option value="<?= (int)$l['id'] ?>" <?= $locId === (int)$l['id'] ? 'selected' : '' ?>><?= e($l['title']) ?></option><?php endforeach; ?>
   </select></form>
+  <?php if (google_enabled()): ?>
   <form method="post" class="inline"><?= csrf_field() ?><button>Sync insights from Google</button></form>
+  <?php endif; ?>
 </div>
 <div class="grid">
 <?php foreach (LABELS as $k => $label): ?>
@@ -53,6 +55,6 @@ page_header('Insights', 'insights');
 <div class="bars">
 <?php foreach ($daily as $day => $v): ?>
   <div title="<?= e($day) ?>: <?= (int)$v ?>" style="height:<?= max(2, (int)round($v / $max * 100)) ?>%"></div>
-<?php endforeach; if (!$daily): ?><span class="muted">No data yet. Click "Sync insights from Google".</span><?php endif; ?>
+<?php endforeach; if (!$daily): ?><span class="muted">No data yet. Insights come from the Google API once it is connected.</span><?php endif; ?>
 </div></div>
 <?php page_footer();

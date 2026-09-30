@@ -13,6 +13,19 @@ const INSIGHT_METRICS = [
     'BUSINESS_DIRECTION_REQUESTS',
 ];
 
+/** True once real Google credentials are in config; until then the app runs in manual mode. */
+function google_enabled(): bool
+{
+    global $config;
+    $id = (string)($config['google']['client_id'] ?? '');
+    return $id !== '' && !str_starts_with($id, 'xxxx');
+}
+
+function is_manual_location(array $loc): bool
+{
+    return ($loc['account_name'] ?? '') === 'manual';
+}
+
 /* ---------- low-level HTTP ---------- */
 
 function http_json(string $method, string $url, ?array $json = null, array $headers = [], ?array $form = null): array
@@ -221,8 +234,10 @@ function gbp_sync_reviews(array $loc): int
 
 function gbp_reply_review(array $loc, string $reviewId, string $comment): void
 {
-    $url = 'https://mybusiness.googleapis.com/v4/' . gbp_v4_path($loc) . '/reviews/' . rawurlencode($reviewId) . '/reply';
-    google_api('PUT', $url, ['comment' => $comment]);
+    if (!is_manual_location($loc)) {
+        $url = 'https://mybusiness.googleapis.com/v4/' . gbp_v4_path($loc) . '/reviews/' . rawurlencode($reviewId) . '/reply';
+        google_api('PUT', $url, ['comment' => $comment]);
+    }
     q('UPDATE reviews SET reply_comment = ?, reply_updated_at = NOW() WHERE location_id = ? AND review_id = ?',
       [$comment, $loc['id'], $reviewId]);
 }
@@ -234,6 +249,10 @@ function gbp_publish_post(array $post): void
     $loc = q('SELECT * FROM locations WHERE id = ?', [$post['location_id']])->fetch();
     if (!$loc) {
         throw new RuntimeException('Location no longer exists.');
+    }
+    if (is_manual_location($loc)) {
+        q("UPDATE posts SET status = 'published', published_at = NOW(), error = NULL WHERE id = ?", [$post['id']]);
+        return;
     }
     $body = ['languageCode' => 'en', 'summary' => $post['summary'], 'topicType' => 'STANDARD'];
     if (!empty($post['cta_type']) && $post['cta_type'] !== 'NONE') {

@@ -7,10 +7,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if (($_POST['action'] ?? '') === 'sync') {
             $n = 0;
-            foreach (q('SELECT * FROM locations')->fetchAll() as $loc) {
+            foreach (q("SELECT * FROM locations WHERE account_name <> 'manual'")->fetchAll() as $loc) {
                 $n += gbp_sync_reviews($loc);
             }
             flash("Synced $n review(s).");
+        } elseif (($_POST['action'] ?? '') === 'add') {
+            $rating = (int)($_POST['rating'] ?? 0);
+            if (!(int)($_POST['location_id'] ?? 0) || $rating < 1 || $rating > 5) {
+                throw new RuntimeException('Pick a location and a rating from 1 to 5.');
+            }
+            q('INSERT INTO reviews (location_id, review_id, reviewer_name, star_rating, comment, review_created_at) VALUES (?,?,?,?,?,NOW())', [
+                (int)$_POST['location_id'], 'manual-' . bin2hex(random_bytes(6)),
+                trim($_POST['reviewer'] ?? '') ?: 'Anonymous', $rating, trim($_POST['comment'] ?? '') ?: null,
+            ]);
+            flash('Review logged.');
         } elseif (($_POST['action'] ?? '') === 'reply') {
             $rev = q('SELECT r.*, l.account_name, l.location_name FROM reviews r JOIN locations l ON l.id = r.location_id WHERE r.id = ?',
                      [(int)($_POST['id'] ?? 0)])->fetch();
@@ -58,8 +68,19 @@ page_header('Reviews', 'reviews');
       <?php foreach ($locs as $l): ?><option value="<?= (int)$l['id'] ?>" <?= $locId === (int)$l['id'] ? 'selected' : '' ?>><?= e($l['title']) ?></option><?php endforeach; ?>
     </select>
   </form>
+  <?php if (google_enabled()): ?>
   <form method="post" class="inline"><?= csrf_field() ?><input type="hidden" name="action" value="sync"><button>Sync reviews from Google</button></form>
+  <?php endif; ?>
 </div>
+
+<details class="card"><summary><strong>+ Log a review manually</strong></summary>
+<form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="add">
+  <label>Location<select name="location_id" required><option value="">Choose...</option>
+    <?php foreach ($locs as $l): ?><option value="<?= (int)$l['id'] ?>"><?= e($l['title']) ?></option><?php endforeach; ?></select></label>
+  <label>Reviewer name<input name="reviewer"></label>
+  <label>Rating<select name="rating"><?php for ($i = 5; $i >= 1; $i--): ?><option value="<?= $i ?>"><?= stars($i) ?></option><?php endfor; ?></select></label>
+  <label>Review text<textarea name="comment" rows="3"></textarea></label>
+  <button>Add review</button></form></details>
 
 <?php foreach ($reviews as $r): ?>
 <div class="card">
@@ -77,6 +98,6 @@ page_header('Reviews', 'reviews');
   </form>
 </div>
 <?php endforeach; if (!$reviews): ?>
-<p class="muted">Nothing here. Try "Sync reviews from Google".</p>
+<p class="muted">Nothing here yet.</p>
 <?php endif;
 page_footer();

@@ -11,7 +11,12 @@ hosting (cPanel) with no build step.
 - Posts: publish now, schedule (via cron), drafts, multi-location
 - Insights: impressions, calls, website clicks and direction requests for the last 30 days
 
-## 1. Google Cloud setup
+## Manual mode (no Google API yet)
+With no Google credentials in `app/config.php`, the app runs in manual mode: add locations, log
+reviews and reply, and create posts locally. Google sync buttons appear once credentials are added,
+and manually added locations are never sent to Google.
+
+## 1. Google Cloud setup (optional, do later)
 1. Create a project at https://console.cloud.google.com.
 2. Enable these APIs: **My Business Account Management API**, **My Business Business Information API**,
    **Google My Business API** (v4, for reviews and posts), **Business Profile Performance API**.
