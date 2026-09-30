@@ -1,0 +1,24 @@
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f6f8;color:#1c2430}
+a{color:#1a5fd0}h1{margin:.2em 0 .6em}h2{font-size:1.1em;margin:.2em 0 .6em}
+.top{display:flex;gap:24px;align-items:center;padding:12px 24px;background:#1c2430;color:#fff}
+.top nav{display:flex;gap:16px;flex:1}.top a{color:#c9d3e0;text-decoration:none}.top a.on,.top a:hover{color:#fff}
+main{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border-radius:8px;padding:16px;margin:0 0 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.stat{display:flex;flex-direction:column;margin:0}.stat strong{font-size:1.8em}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #edf0f3;vertical-align:top}th{background:#f8f9fb;font-size:.85em}
+label{display:block;margin:0 0 12px;font-weight:600}label.check{display:inline-block;margin-right:16px;font-weight:400}
+input,select,textarea{display:block;width:100%;padding:8px;margin-top:4px;border:1px solid #cbd3dd;border-radius:6px;font:inherit}
+input[type=checkbox]{display:inline;width:auto}.bar select,.inline select{width:auto;display:inline-block}
+button,.btn{background:#1a5fd0;color:#fff;border:0;border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{background:#1450b3}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+form.inline{display:inline-flex;gap:8px;align-items:center;margin:0}
+.muted{color:#6b7787;font-size:.9em}.stars{color:#e8a400;margin:0 8px}.err-text{color:#b42318;font-size:.85em}
+.flash{padding:10px 14px;border-radius:6px;margin-bottom:16px;background:#e6f4ea;color:#14532d}.flash.err{background:#fde8e8;color:#991b1b}
+.pill{padding:2px 8px;border-radius:99px;font-size:.8em;background:#e5e9ef}.pill.active,.pill.published{background:#d9f2e0}
+.pill.failed,.pill.churned{background:#fde8e8}.pill.scheduled,.pill.lead{background:#fff3cd}
+blockquote{margin:8px 0;padding:8px 12px;background:#f1f5fb;border-left:3px solid #1a5fd0}
+fieldset{border:1px solid #dde3ea;border-radius:6px;margin-bottom:12px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:140px}.bars div{flex:1;background:#1a5fd0;border-radius:2px 2px 0 0;min-width:3px}
+.top .logout{margin-left:auto}.auth{display:flex;min-height:100vh;align-items:center;justify-content:center}.auth .card{width:340px}
